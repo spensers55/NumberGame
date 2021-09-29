@@ -5,6 +5,8 @@ import tkinter
 
 counter = 0 # global counter variable
 
+# EVERYTHING AFTER THIS POINT BEFORE THE THREE LINE COMMENT IS OLD. THIS PROGRAM USES TKINTER UI NOW
+
 def userPlay(): # NOTE: this function is not being used in the current build
     global counter
     print("Generating a number between 0 and 1,000,000...")
@@ -49,6 +51,10 @@ def compPlay():
 #end function
 
 
+#
+# THIS IS THE THREE LINE COMMENT. RELEVANT CODE STARTS HERE
+#
+
 def quitButton(window): # pass in a scene to close
     window.destroy() # close passed in scene
 
@@ -56,7 +62,7 @@ def main(): # this function runs most of the UI Logic of the program
     scene = tkinter.Tk() # create main window
     tkinter.Label(scene, text="Guessing Game Menu: Please Choose").grid(row=0,column=0) # set menu label
     tkinter.Button(scene, text="Play", command=lambda:userPlayUI()).grid(row=1,column=0) # buttons for options
-    tkinter.Button(scene, text="Generate", command=lambda:compPlay()).grid(row=2,column=0)
+    tkinter.Button(scene, text="Generate", command=lambda:compPlayUI()).grid(row=2,column=0)
     tkinter.Button(scene, text="Quit", command=lambda:quitButton(scene)).grid(row=3,column=0)
     scene.mainloop() # set to mainloop
 #end function
@@ -109,7 +115,47 @@ def userPlayUI(): # this function runs the game for the user in the GUI
     responseLabel.grid(row=4,column=0) # place on grid
     # vvv bind user input to <Return> (enter key), call check and logic function vvv
     entryBox.bind('<Return>', lambda self:checkVal(UserScene,entryBox,target,responseLabel, guessLabel, counterLabel))
+#end function
+
+def CompGameLogic(CompScene, entryBox, responseLabel): # this function guesses the number input by the user
+    responseLabel.config(text="Computer's Guesses:\n")# reset in case user plays multiple times
+    target = int(entryBox.get()) # retrieve user input (sacrificed validation, rip)
+    global counter
+    top = 1000000   # moving top bound
+    bottom = 0      # moving bottom bound
+    adjustment = 500000  # amount to move by
+    counter = 1     # keep track of guesses
+    guess = 500000  # starting guess
+    while guess != target:  # while computer hasn't guess the number
+        if guess > target:  # if guessed too high
+            top = int(top - adjustment) # move top bound down
+            responseLabel.config(text = responseLabel.cget("text")+"{0} is too high\n".format(guess))  # show user the searching
+        else:   # if guessed too low
+            bottom = int(bottom + adjustment)   # move bottom bound up
+            responseLabel.config(text=responseLabel.cget("text")+"{0} is too low\n".format(guess))  # show user the search
+        counter += 1 # count guesses
+        adjustment = int(top-bottom)/2  # calculate new adjustment
+        guess = int(adjustment + bottom)    # split difference for new guess
+    responseLabel.config(text=responseLabel.cget("text")+"The computer got it in {0} guesses!".format(counter)) # success message
+    tkinter.Button(CompScene, text="Quit",command=lambda:quitButton(CompScene)).grid(row=2,column=1) # load quit button
+#end function
+
+def compPlayUI():#this function loads the UI for the computer to guess your number
+    CompScene = tkinter.Tk() # create scene
+    tkinter.Label(CompScene, text="Computer Game").grid(row=0,column=0) # basic labelling
+    tkinter.Label(CompScene, text="Enter number between 1-1000000").grid(row=1,column=0)
+
+    inputBox = tkinter.Entry(CompScene) # load input entry
+    inputBox.grid(row=1,column=1)
+
+    responseLabel = tkinter.Label(CompScene,text="Computer's Guesses:\n") # create response label
+    responseLabel.grid(row=2,column=0)
+    inputBox.bind('<Return>', lambda self:CompGameLogic(CompScene,inputBox,responseLabel)) # bind enter to logic
+# end function
     
+
+
+
 #while True:
 #    choice = input("Would you like to guess [1] or generate [2]? ([3] to quit): ")
 #    if choice == "1":
